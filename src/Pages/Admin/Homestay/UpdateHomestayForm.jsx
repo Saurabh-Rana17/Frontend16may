@@ -2,7 +2,7 @@ import { Box, Button, Grid, Paper, TextField, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import ImageUploader from "../../../components/Admin/ImageUploader";
 import MapViewer from "../../../components/Admin/MapViewer";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import useFetch from "../../../hooks/useFetch";
 import Loader from "../../../components/Skeleton/Loader";
 import ImageViewer from "../../../components/Admin/ImageViewer";
@@ -13,6 +13,8 @@ import { toast } from "react-toastify";
 export default function UpdateHomestayForm() {
   const params = useParams();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
   const {
     data,
     error,
@@ -28,13 +30,14 @@ export default function UpdateHomestayForm() {
   } = useMutation({
     mutationFn: postData,
     onSuccess: () => {
-      toast.success("Added Successfully");
+      toast.success("Updated Successfully");
       queryClient.invalidateQueries({
         queryKey: [`/homestay/${params.id}`, "homestay"],
       });
+      navigate("/admin/managehomestay/update");
     },
     onError: () => {
-      toast.error("Failed to Submit");
+      toast.error("Failed to Update");
     },
   });
 
@@ -199,6 +202,7 @@ export default function UpdateHomestayForm() {
           }}
         >
           <Button
+            disabled={isPending}
             type="submit"
             color="success"
             sx={{ width: "6rem" }}
@@ -212,6 +216,9 @@ export default function UpdateHomestayForm() {
             <br />
             <p style={{ color: "red" }}>{localError}</p>
           </>
+        )}
+        {isPostError && (
+          <Typography color={"red"}> Error : {postError.message} </Typography>
         )}
       </Paper>
     </Box>
