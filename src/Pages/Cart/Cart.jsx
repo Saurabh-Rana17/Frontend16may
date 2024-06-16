@@ -21,6 +21,8 @@ import { CartContext } from "../../store/StateProvider";
 import { userContext } from "../../store/UserProvider";
 import AuthModal from "../../components/Modal/AuthModal";
 import OtpModal from "../../components/Modal/OtpModal";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { postData } from "../../utility/postData";
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -29,6 +31,24 @@ export default function Cart() {
   const { userState: user } = useContext(userContext);
   const { cartState, deleteTour, deletePackage, deleteHotel, deleteHomestay } =
     useContext(CartContext);
+  const queryClient = useQueryClient();
+
+  const {
+    mutate,
+    isPending,
+    error: postError,
+    isError,
+  } = useMutation({
+    mutationFn: postData,
+    onSuccess: () => {
+      toast.success("Submitted Successfully");
+      // queryClient.invalidateQueries({ queryKey: ["/homestay"] });
+      navigate("/success");
+    },
+    onError: () => {
+      toast.error("Failed to Submit");
+    },
+  });
 
   const handleBook = async (event) => {
     event.preventDefault();
@@ -37,23 +57,18 @@ export default function Cart() {
     } else if (!user.active) {
       setShowOtpModal(true);
     } else {
-      // setIsSubmitting(true);
-      // const response = await fetch(
-      //   "http://localhost:8080/package/book",
-      //   {
-      //     method: "",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     body: JSON.stringify({
-      //       email: user.email,
-      //       package: data.id,
-      //     }),
-      //   }
-      // );
-      // const res = await response.json();
-      // setIsSubmitting(false);
-      // navigate("/success");
+      let { homestay, hotels, packages, tours } = cartState;
+
+      const dataObj = {
+        homestay: homestay.map((el) => el.id),
+        hotels: hotels.map((el) => el.id),
+        email: user.email,
+        tours: tours.map((el) => el.id),
+        packages: packages.map((el) => el.id),
+      };
+
+      console.log(dataObj);
+      mutate({ url: "/cart", data: dataObj });
     }
   };
 
@@ -412,12 +427,15 @@ export default function Cart() {
         <Box width={"fit-content"} sx={{ margin: "auto" }}>
           <Button
             onClick={handleBook}
-            disabled={cartState.total <= 0}
+            disabled={cartState.total <= 0 || isPending}
             variant="contained"
           >
             Book Now
           </Button>
         </Box>
+        {isError && (
+          <Typography color={"red"}> Error : {postError.message} </Typography>
+        )}
       </Paper>
     </>
   );

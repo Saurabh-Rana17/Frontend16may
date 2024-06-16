@@ -23,7 +23,7 @@ function BookingSuccess() {
             Your Booking is Successful
           </Typography>
           <Typography gutterBottom variant="body1">
-            Our Agent will contact you within 24 working hours
+            Our Agent will contact you within 2-3 working hours
           </Typography>
           <Box
             sx={{
