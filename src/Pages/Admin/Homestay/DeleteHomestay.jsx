@@ -43,7 +43,7 @@ export default function DeleteHomestay() {
       }
       const data = await response.json();
       if (data) {
-        queryClient.invalidateQueries({ queryKey: ["homestay"] });
+        queryClient.invalidateQueries({ queryKey: ["/homestay"] });
         toast.success("deleted successfully");
         navigate("/admin/managehomestay/update");
       }

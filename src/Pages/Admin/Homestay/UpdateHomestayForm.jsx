@@ -32,7 +32,7 @@ export default function UpdateHomestayForm() {
     onSuccess: () => {
       toast.success("Updated Successfully");
       queryClient.invalidateQueries({
-        queryKey: [`/homestay/${params.id}`, "homestay"],
+        queryKey: [`/homestay/${params.id}`, "/homestay"],
       });
       navigate("/admin/managehomestay/update");
     },

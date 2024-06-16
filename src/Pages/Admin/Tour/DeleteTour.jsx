@@ -37,7 +37,7 @@ function DeleteTour() {
       }
       const data = await response.json();
       if (data) {
-        queryClient.invalidateQueries({ queryKey: ["tour"] });
+        queryClient.invalidateQueries({ queryKey: ["/tour"] });
         toast.success("deleted successfully");
         navigate("/admin/managetour/update");
       }
