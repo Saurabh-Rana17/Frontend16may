@@ -11,9 +11,12 @@ import {
 import React, { useEffect, useState } from "react";
 import ImageUploader from "../../../components/Admin/ImageUploader";
 import useFetch from "../../../hooks/useFetch";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Loader from "../../../components/Skeleton/Loader";
 import ImageViewer from "../../../components/Admin/ImageViewer";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { postData } from "../../../utility/postData";
+import { toast } from "react-toastify";
 
 export default function UpdateTourForm() {
   const params = useParams();
@@ -23,6 +26,27 @@ export default function UpdateTourForm() {
     isError,
     isPending: loading,
   } = useFetch(`/tour/${params.id}`);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const {
+    mutate,
+    isPending,
+    error: postError,
+    isError: isPostError,
+  } = useMutation({
+    mutationFn: postData,
+    onSuccess: () => {
+      toast.success("Updated Successfully");
+      queryClient.invalidateQueries({
+        queryKey: [`/tour/${params.id}`, "/tour"],
+      });
+      navigate("/admin/managetour/update");
+    },
+    onError: () => {
+      toast.error("Failed to Update");
+    },
+  });
 
   const [mainImg, setMainimg] = useState([]);
   const [name, setName] = useState("");
@@ -68,7 +92,7 @@ export default function UpdateTourForm() {
       Category: selectedItems,
       id: params.id,
     };
-    console.log(data);
+    mutate({ url: "/tour/add", data: data });
   }
 
   if (isError) {
@@ -183,6 +207,7 @@ export default function UpdateTourForm() {
           }}
         >
           <Button
+            disabled={isPending}
             type="submit"
             color="success"
             sx={{ width: "6rem" }}
@@ -196,6 +221,9 @@ export default function UpdateTourForm() {
             <br />
             <p style={{ color: "red" }}>{error}</p>
           </>
+        )}
+        {isPostError && (
+          <Typography color={"red"}> Error : {postError.message} </Typography>
         )}
       </Paper>
     </Box>
