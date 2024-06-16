@@ -22,7 +22,7 @@ export default function AddHomestay() {
   const [error, setError] = useState("");
   const [maplocation, setMapLocation] = useState("");
   const queryClient = useQueryClient();
-  const naviagte = useNavigate();
+  const navigate = useNavigate();
 
   const {
     mutate,
@@ -34,7 +34,7 @@ export default function AddHomestay() {
     onSuccess: () => {
       toast.success("Added Successfully");
       queryClient.invalidateQueries({ queryKey: ["/homestay"] });
-      naviagte("/admin/managehomestay/update");
+      navigate("/admin/managehomestay/update");
     },
     onError: () => {
       toast.error("Failed to Submit");

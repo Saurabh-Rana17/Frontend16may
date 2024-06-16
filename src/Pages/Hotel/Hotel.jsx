@@ -6,18 +6,15 @@ import HorizontalSkeleton from "../../components/Skeleton/HorizontalSkeleton";
 import { useQuery } from "@tanstack/react-query";
 
 const fetchData = async () => {
-  const response = await fetch(
-    `http://localhost:8080/hotel/filter`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        cost: "0,100000000",
-      }),
-    }
-  );
+  const response = await fetch(`http://localhost:8080/hotel/filter`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      cost: "0,100000000",
+    }),
+  });
   if (!response.ok) {
     throw new Error(
       `Failed to fetch ${response.status}  ${response.statusText}`
@@ -41,7 +38,7 @@ function Hotel() {
     isError,
     error,
   } = useQuery({
-    queryKey: ["allHotel"],
+    queryKey: ["Hotel"],
     queryFn: fetchData,
   });
 

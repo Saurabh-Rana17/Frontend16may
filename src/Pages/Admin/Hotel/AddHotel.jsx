@@ -4,6 +4,10 @@ import ImageUploader from "../../../components/Admin/ImageUploader";
 import MapViewer from "../../../components/Admin/MapViewer";
 import { convertImgbb } from "../../../utility/convertImgbb";
 import ImageViewer from "../../../components/Admin/ImageViewer";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { postData } from "../../../utility/postData";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 export default function AddHotel() {
   const [mainImg, setMainimg] = useState([]);
@@ -15,6 +19,25 @@ export default function AddHotel() {
   const [error, setError] = useState("");
   const [maplocation, setMapLocation] = useState("");
   const [showMainImg, setShowMainImg] = useState(false);
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  const {
+    mutate,
+    isPending,
+    error: postError,
+    isError,
+  } = useMutation({
+    mutationFn: postData,
+    onSuccess: () => {
+      toast.success("Added Successfully");
+      queryClient.invalidateQueries({ queryKey: ["/hotel"] });
+      navigate("/admin/managehotel/update");
+    },
+    onError: () => {
+      toast.error("Failed to Submit");
+    },
+  });
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -48,7 +71,7 @@ export default function AddHotel() {
       cost: cost,
       city: city,
     };
-    console.log(data);
+    mutate({ data: data, url: "/hotel/add" });
   }
   return (
     <Box
@@ -145,6 +168,7 @@ export default function AddHotel() {
           }}
         >
           <Button
+            disabled={isPending}
             type="submit"
             color="success"
             sx={{ width: "6rem" }}
@@ -158,6 +182,9 @@ export default function AddHotel() {
             <br />
             <p style={{ color: "red" }}>{error}</p>
           </>
+        )}
+        {isError && (
+          <Typography color={"red"}> Error : {postError.message} </Typography>
         )}
       </Paper>
     </Box>
