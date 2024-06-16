@@ -89,7 +89,7 @@ export default function UpdateTourForm() {
       title: name,
       image: image,
       description,
-      Category: selectedItems,
+      category: selectedItems,
       id: params.id,
     };
     mutate({ url: "/tour/add", data: data });

@@ -9,8 +9,15 @@ import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { BaseUrl } from "../../../utility/CONSTANT";
+import { toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
 
 function DeleteTour() {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [deleting, setDeleting] = useState(false);
+
   const { data: post, isError, error, isPending: loading } = useFetch("/tour");
   if (isError) {
     return (
@@ -20,7 +27,28 @@ function DeleteTour() {
     );
   }
   function handleClick(id) {
-    console.log(id);
+    async function fetchData() {
+      setDeleting(true);
+      const response = await fetch(BaseUrl + `/tour/delete/${id}`);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch ${response.status}  ${response.statusText}`
+        );
+      }
+      const data = await response.json();
+      if (data) {
+        queryClient.invalidateQueries({ queryKey: ["tour"] });
+        toast.success("deleted successfully");
+        navigate("/admin/managetour/update");
+      }
+      setDeleting(false);
+      return data;
+    }
+    try {
+      fetchData();
+    } catch (error) {
+      console.log(error);
+    }
   }
   return (
     <>
@@ -44,6 +72,7 @@ function DeleteTour() {
                     {post.description.substring(0, 80)}...
                   </Typography>
                   <Button
+                    disabled={deleting}
                     onClick={() => handleClick(post.id)}
                     variant="contained"
                     color="error"
@@ -85,6 +114,7 @@ function DeleteTour() {
                     {post.description.substring(0, 197)} ...
                   </Typography>
                   <Button
+                    disabled={deleting}
                     onClick={() => handleClick(post.id)}
                     variant="contained"
                     color="error"
