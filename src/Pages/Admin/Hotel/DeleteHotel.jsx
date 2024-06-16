@@ -1,25 +1,25 @@
 import { Button, Grid, Typography } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import HorizontalSkeleton from "../../../components/Skeleton/HorizontalSkeleton";
+import { BaseUrl } from "../../../utility/CONSTANT";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const fetchData = async () => {
-  const response = await fetch(
-    `http://localhost:8080/hotel/filter`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        cost: "0,100000000",
-      }),
-    }
-  );
+  const response = await fetch(`http://localhost:8080/hotel/filter`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      cost: "0,100000000",
+    }),
+  });
   if (!response.ok) {
     throw new Error(
       `Failed to fetch ${response.status}  ${response.statusText}`
@@ -28,11 +28,11 @@ const fetchData = async () => {
   return response.json();
 };
 
-function handleDelete(id) {
-  console.log(id);
-}
-
 export default function DeleteHotel() {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [deleting, setDeleting] = useState(false);
+
   // const loading = false;
   const {
     data: post,
@@ -46,6 +46,31 @@ export default function DeleteHotel() {
         Error : {error.message}
       </Typography>
     );
+  }
+
+  function handleDelete(id) {
+    async function fetchData() {
+      setDeleting(true);
+      const response = await fetch(BaseUrl + `/hotel/delete/${id}`);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch ${response.status}  ${response.statusText}`
+        );
+      }
+      const data = await response.json();
+      if (data) {
+        queryClient.invalidateQueries({ queryKey: ["hotel"] });
+        toast.success("deleted successfully");
+        navigate("/admin/managehotel/update");
+      }
+      setDeleting(false);
+      return data;
+    }
+    try {
+      fetchData();
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (
@@ -82,6 +107,7 @@ export default function DeleteHotel() {
                     💵<b>₹{post.cost}</b>
                   </Typography>
                   <Button
+                    disabled={deleting}
                     onClick={() => handleDelete(post.id)}
                     sx={{ display: "block" }}
                     variant="contained"
@@ -127,6 +153,7 @@ export default function DeleteHotel() {
                     💵<b>₹{post.cost}</b>
                   </Typography>
                   <Button
+                    disabled={deleting}
                     onClick={() => handleDelete(post.id)}
                     sx={{ display: "block" }}
                     variant="contained"

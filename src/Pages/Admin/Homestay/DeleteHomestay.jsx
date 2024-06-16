@@ -9,6 +9,7 @@ import HorizontalSkeleton from "../../../components/Skeleton/HorizontalSkeleton"
 import useFetch from "../../../hooks/useFetch";
 import { BaseUrl } from "../../../utility/CONSTANT";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function DeleteHomestay() {
   // const loading = false;
@@ -43,6 +44,7 @@ export default function DeleteHomestay() {
       const data = await response.json();
       if (data) {
         queryClient.invalidateQueries({ queryKey: ["homestay"] });
+        toast.success("deleted successfully");
         navigate("/admin/managehomestay/update");
       }
       setDeleting(false);
