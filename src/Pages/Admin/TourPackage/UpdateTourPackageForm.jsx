@@ -12,9 +12,12 @@ import React, { useEffect, useState } from "react";
 import ImageUploader from "../../../components/Admin/ImageUploader";
 import MapViewer from "../../../components/Admin/MapViewer";
 import useFetch from "../../../hooks/useFetch";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Loader from "../../../components/Skeleton/Loader";
 import ImageViewer from "../../../components/Admin/ImageViewer";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { postData } from "../../../utility/postData";
+import { toast } from "react-toastify";
 
 export default function AddTourPackage() {
   const params = useParams();
@@ -25,6 +28,8 @@ export default function AddTourPackage() {
   const [error, setError] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
   const [tourOption, setTourOption] = useState([]);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const {
     data: post,
@@ -39,6 +44,25 @@ export default function AddTourPackage() {
     packageIsError,
     isPending: packageLoading,
   } = useFetch(`/package/${params.id}`);
+
+  const {
+    mutate,
+    isPending,
+    error: postError,
+    isError: isPostError,
+  } = useMutation({
+    mutationFn: postData,
+    onSuccess: () => {
+      toast.success("Updated Successfully");
+      queryClient.invalidateQueries({
+        queryKey: [`/package/${params.id}`, "/package"],
+      });
+      navigate("/admin/managetourpackage/update");
+    },
+    onError: () => {
+      toast.error("Failed to Update");
+    },
+  });
 
   useEffect(() => {
     if (packages && post) {
@@ -102,7 +126,7 @@ export default function AddTourPackage() {
       tours: tourArr,
       id: params.id,
     };
-    console.log(data);
+    mutate({ data: data, url: "/package/add" });
   }
 
   if (isError) {
@@ -236,6 +260,7 @@ export default function AddTourPackage() {
           }}
         >
           <Button
+            disabled={isPending}
             type="submit"
             color="success"
             sx={{ width: "6rem" }}
@@ -249,6 +274,9 @@ export default function AddTourPackage() {
             <br />
             <p style={{ color: "red" }}>{error}</p>
           </>
+        )}
+        {isPostError && (
+          <Typography color={"red"}> Error : {postError.message} </Typography>
         )}
       </Paper>
     </Box>
