@@ -2,10 +2,13 @@ import { Box, Button, Grid, Paper, TextField, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import ImageUploader from "../../../components/Admin/ImageUploader";
 import MapViewer from "../../../components/Admin/MapViewer";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import useFetch from "../../../hooks/useFetch";
 import Loader from "../../../components/Skeleton/Loader";
 import ImageViewer from "../../../components/Admin/ImageViewer";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import { postData } from "../../../utility/postData";
 
 export default function UpdateHotelForm() {
   const params = useParams();
@@ -23,6 +26,27 @@ export default function UpdateHotelForm() {
   const [city, setCity] = useState("");
   const [localError, setLocalError] = useState("");
   const [maplocation, setMapLocation] = useState("");
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const {
+    mutate,
+    isPending,
+    error: postError,
+    isError: isPostError,
+  } = useMutation({
+    mutationFn: postData,
+    onSuccess: () => {
+      toast.success("Updated Successfully");
+      queryClient.invalidateQueries({
+        queryKey: [`/hotel/${params.id}`, "hotel"],
+      });
+      navigate("/admin/managehotel/update");
+    },
+    onError: () => {
+      toast.error("Failed to Update");
+    },
+  });
 
   useEffect(() => {
     if (data) {
@@ -69,7 +93,7 @@ export default function UpdateHotelForm() {
       city: city,
       id: params.id,
     };
-    console.log(dataObj);
+    mutate({ url: "/hotel/add", data: dataObj });
   }
   if (loading) {
     return <Loader />;
@@ -176,6 +200,7 @@ export default function UpdateHotelForm() {
           }}
         >
           <Button
+            disabled={isPending}
             type="submit"
             color="success"
             sx={{ width: "6rem" }}
@@ -189,6 +214,9 @@ export default function UpdateHotelForm() {
             <br />
             <p style={{ color: "red" }}>{localError}</p>
           </>
+        )}
+        {isPostError && (
+          <Typography color={"red"}> Error : {postError.message} </Typography>
         )}
       </Paper>
     </Box>
