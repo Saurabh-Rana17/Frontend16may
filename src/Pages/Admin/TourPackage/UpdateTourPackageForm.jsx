@@ -86,13 +86,10 @@ export default function AddTourPackage() {
         };
       });
       setSelectedItems(temp2);
-      // console.log(temp1);
-      // console.log(temp2);
     }
   }, [post, packages]);
 
   const handleChange = (event, newValues) => {
-    // console.log(newValues);
     setSelectedItems(newValues);
   };
 
@@ -148,16 +145,6 @@ export default function AddTourPackage() {
       </Typography>
     );
   }
-
-  //   {
-  //     "label": "Kedarnath Temple",
-  //     "value": "662ba892e5940cc79c4d6e0b"
-  // }
-
-  //   {
-  //     "label": "Kedarnath Temple",
-  //     "value": "662ba892e5940cc79c4d6e0b"
-  // }
 
   return (
     <Box
